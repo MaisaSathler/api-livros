@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 
 app = Flask(__name__)
@@ -22,7 +22,7 @@ init_db()
 
 @app.route('/')
 def homepage():
-    return "<h2>Minha página usando Flask</h2>"
+    return render_template('index.html')
 
 
 @app.route("/doar", methods=["POST"])
@@ -64,6 +64,21 @@ def listar_livros():
         livros_formatados.append(dicionario_livros)
     return jsonify(livros_formatados)
 
+
+
+
+
+@app.route('/livros/<int:livro_id>', methods=["DELETE"])
+def deletar_livro(livro_id):
+    with sqlite3.connect("database.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM livros WHERE id = ?", (livro_id,))
+        conn.commit()
+    
+    if cursor.rowcount == 0:
+        return jsonify({"erro": "Livro não encontrado" }), 404
+
+    return jsonify({"mensagem": "Livro excluído com sucesso"}), 200
 
 
 
